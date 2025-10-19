@@ -1,0 +1,44 @@
+﻿@model Cinema
+<div class="container">
+    <div class="row mb-3 align-items-center my-3">
+        <div class="col-md-6">
+            <h2 class="display-6">Create New Cinema</h2>
+        </div>
+    </div>
+
+    <div class="row my-3">
+        <div class="col-12">
+            <form method="post" enctype="multipart/form-data">
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Title</label>
+                    <input class="form-control" name="Name" value="@Model.Name">
+                </div>
+                <img class="rounded-1 border border-200" src="~/assets/TaskImages/@Model.MainImg" width="60" alt="" onechange="previewImage(event)">
+                <div class="mb-3">
+                    <label for="img" class="form-label">Main Img</label>
+                    <input type="file" class="form-control" name="img">
+                </div>
+
+                <input type="submit" class="btn btn-primary" value="Create" />
+
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function previewImage(event) {
+      const input = event.target;
+      const preview = document.getElementById("preview");
+
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+          preview.src = e.target.result; // الصورة الجديدة
+        }
+
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+</script>
