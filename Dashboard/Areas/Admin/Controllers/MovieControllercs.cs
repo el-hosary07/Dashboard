@@ -1,79 +1,138 @@
 ﻿using Dashboard.DataAccess;
 using Dashboard.Models;
+using Dashboard.Repositories;
+using Dashboard.Repositories.IRepositories;
+using Dashboard.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Dashboard.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+
     public class MovieController : Controller
     {
-        private ApplicationDbContext _context = new();
+        private readonly IRepository<Movie> _movieRepository;
+        private readonly IRepository<Category> _categoryRepository;
+        private readonly IRepository<Cinema> _cinemaRepository;
+        private readonly IMovieSubImagesRepository _subImagesRepository;
 
-        public IActionResult Index()
+
+        //private ApplicationDbContext _context = new();
+
+
+
+        public MovieController(
+            IRepository<Movie> movieRepository,
+            IRepository<Category> categoryRepository,
+            IRepository<Cinema> cinemaRepository,
+            IMovieSubImagesRepository subImagesRepository
+            ) 
         {
-            var Movie = _context.Movies.AsNoTracking().AsQueryable();
-            return View(Movie.Select(e=>new
-            {
-                e.Id,
-                e.MainImg,
-                e.Name,
-                
-            }).AsEnumerable());
+            _movieRepository = movieRepository;
+            _categoryRepository = categoryRepository;
+            _cinemaRepository = cinemaRepository;
+            _subImagesRepository = subImagesRepository;
+        }   
+
+
+        public async Task<IActionResult> Index(CancellationToken cancellationToken)
+        {
+            var movie = await _movieRepository.GetAsync(include: [e=>e.Category,e=>e.Cinema] ,tracked: false, cancellationToken: cancellationToken);
+
+            return View(movie.AsEnumerable());
         }
         [HttpGet]
-        public IActionResult New()
+        public async Task<IActionResult> New(CancellationToken cancellationToken)
         {
-            return View();
+            var categories = await _categoryRepository.GetAsync(tracked: false, cancellationToken: cancellationToken);
+            var cinemas = await _cinemaRepository.GetAsync(tracked: false, cancellationToken: cancellationToken);
+
+            return View(new NewMovieVM()
+            {
+                Cinemas = cinemas.AsEnumerable(),
+                Categories = categories.AsEnumerable(),
+            });
         }
         [HttpPost]
-        public IActionResult New(Movie Movie, IFormFile img)
+        public async Task<IActionResult> New(Movie Movie, IFormFile MainImg, List<IFormFile> SubImages, CancellationToken cancellationToken)
         {
-            if (img is not null && img.Length > 0)
+            if (MainImg is not null && MainImg.Length > 0)
             {
-                var imgName = Guid.NewGuid().ToString() + Path.GetExtension(img.FileName);
+                var imgName = Guid.NewGuid().ToString() + Path.GetExtension(MainImg.FileName);
                 var imgPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot//assets//TaskImages", imgName);
 
 
                 using (var stream = System.IO.File.Create(imgPath))
                 {
-                    img.CopyTo(stream);
+                    MainImg.CopyTo(stream);
 
                 }
 
                 Movie.MainImg = imgName;
             }
+            var movieCreated = await _movieRepository.CreateAsync(Movie, cancellationToken: cancellationToken);
+            await _movieRepository.CommitAsync(cancellationToken);
 
+            if (SubImages is not null && SubImages.Count > 0)
+            {
+                foreach (var item in SubImages)
+                {
+                    var subImagesName = Guid.NewGuid().ToString() + Path.GetExtension(item.FileName);
+                    var subImagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\assets\\TaskSubImages", subImagesName);
 
-            _context.Movies.Add(Movie);
-            _context.SaveChanges();
+                    using (var stream = System.IO.File.Create(subImagesPath))
+                    {
+                        item.CopyTo(stream);
+
+                    }
+
+                    await _subImagesRepository.CreateAsync(new()
+                    {
+                        Img = subImagesName,
+                        MovieId = movieCreated.Id
+                    },cancellationToken);
+                }
+                await _subImagesRepository.CommitAsync(cancellationToken);
+            }
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id,CancellationToken cancellationToken)
         {
-            var Movie = _context.Movies.Find(id);
-            if (Movie == null)
+            var movie = await _movieRepository.GetOneAsync(e=>e.Id == id, cancellationToken :cancellationToken);
+            if (movie == null)
             {
                 return NotFound();
             }
+            
 
-            return View(Movie);
+
+            return View(new NewMovieVM()
+            {
+                Movie = movie,
+                Categories = await _categoryRepository.GetAsync(tracked: false, cancellationToken: cancellationToken),
+                Cinemas =  await _cinemaRepository.GetAsync(tracked: false, cancellationToken: cancellationToken),
+                SubImages = await _subImagesRepository.GetAsync(e => e.MovieId == id, cancellationToken: cancellationToken)
+            });
         }
         [HttpPost]
-        public IActionResult Edit(Movie Movie, IFormFile img)
+        public async Task<IActionResult> Edit(Movie Movie, IFormFile? MainImg, List<IFormFile>? SubImages,CancellationToken cancellationToken)
         {
-            var movieInDB = _context.Movies.AsNoTracking().FirstOrDefault(e => e.Id == Movie.Id);
-            if (img is not null)
+            var movieInDB = await _movieRepository.GetOneAsync(e => e.Id == Movie.Id, tracked: false, cancellationToken: cancellationToken);
+            if (MainImg is not null)
             {
-                if (img.Length > 0)
+                if (MainImg.Length > 0)
                 {
-                    var imgName = Guid.NewGuid().ToString() + Path.GetExtension(img.FileName);
+                    var imgName = Guid.NewGuid().ToString() + Path.GetExtension(MainImg.FileName);
                     var imgPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot//assets//TaskImages", imgName);
 
 
                     using (var stream = System.IO.File.Create(imgPath))
                     {
-                        img.CopyTo(stream);
+                        MainImg.CopyTo(stream);
 
                     }
 
@@ -87,23 +146,52 @@ namespace Dashboard.Areas.Admin.Controllers
 
             }
 
+            if (SubImages is not null)
+            {
+                if (SubImages.Count>0)
+                {
+                    var oldImages = await _subImagesRepository.GetAsync(e => e.MovieId == Movie.Id);
 
-            _context.Movies.Update(Movie);
-            _context.SaveChanges();
+                    _subImagesRepository.RemoveRange(oldImages);
+
+
+                    foreach (var item in SubImages)
+                    {
+                        var subImagesName = Guid.NewGuid().ToString() + Path.GetExtension(item.FileName);
+                        var subImagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\assets\\TaskSubImages", subImagesName);
+
+                        using (var stream = System.IO.File.Create(subImagesPath))
+                        {
+                            item.CopyTo(stream);
+
+                        }
+
+                        await _subImagesRepository.CreateAsync(new()
+                        {
+                            Img = subImagesName,
+                            MovieId = Movie.Id,
+                        } , cancellationToken:cancellationToken);
+                    }
+                    await _subImagesRepository.CommitAsync(cancellationToken);
+                }
+            }
+
+            _movieRepository.Update(Movie);
+            await _movieRepository.CommitAsync(cancellationToken) ;
 
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            var Movie = _context.Movies.Find(id);
-            if (Movie == null)
+            var movie = await _movieRepository.GetOneAsync(e => e.Id == id, cancellationToken: cancellationToken);
+            if (movie is null)
             {
                 return NotFound();
             }
-
-            _context.Movies.Remove(Movie);
-            _context.SaveChanges();
+            
+             _movieRepository.Delete(movie); 
+            await _movieRepository.CommitAsync (cancellationToken) ;
 
             return RedirectToAction(nameof(Index));
         }

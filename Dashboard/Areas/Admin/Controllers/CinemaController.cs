@@ -1,26 +1,41 @@
 ﻿using Dashboard.DataAccess;
 using Dashboard.Models;
+using Dashboard.Repositories;
+using Dashboard.Repositories.IRepositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Common;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Dashboard.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+
     public class CinemaController : Controller
     {
-        private ApplicationDbContext _context = new();
+        //private ApplicationDbContext _context = new();
+        private IRepository<Cinema> _cinemaRepository;//= new Repository<Cinema>();
 
-        public IActionResult Index()
+        public CinemaController(IRepository<Cinema> cinemaRepository)
         {
-            var Cinema = _context.Cinemas.AsNoTracking().AsQueryable();
-            return View(Cinema.AsEnumerable());
+            _cinemaRepository= cinemaRepository;
         }
+
+
+        public async Task<IActionResult> Index(CancellationToken cancellationToken)
+        {
+            var category = await _cinemaRepository.GetAsync(tracked: false, cancellationToken: cancellationToken);
+            return View(category.AsEnumerable());
+        }
+        
         [HttpGet]
         public IActionResult New()
         {
             return View();
         }
         [HttpPost]
-        public IActionResult New(Cinema Cinema, IFormFile img)
+        public async Task<IActionResult> New(Cinema Cinema, IFormFile img, CancellationToken cancellationToken)
         {
             if (img is not null && img.Length > 0)
             {
@@ -38,14 +53,17 @@ namespace Dashboard.Areas.Admin.Controllers
             }
             
 
-            _context.Cinemas.Add(Cinema);
-            _context.SaveChanges();
+            //_context.Cinemas.Add(Cinema);
+            //_context.SaveChanges();
+            await _cinemaRepository.CreateAsync(Cinema, cancellationToken);
+            await _cinemaRepository.CommitAsync(cancellationToken);
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id,CancellationToken cancellationToken)
         {
-            var Cinema = _context.Cinemas.Find(id);
+            var Cinema = await _cinemaRepository.GetOneAsync(e => e.Id == id, cancellationToken: cancellationToken);//_context.Cinemas.Find(id);
+           
             if (Cinema == null)
             {
                 return NotFound();
@@ -54,9 +72,9 @@ namespace Dashboard.Areas.Admin.Controllers
             return View(Cinema);
         }
         [HttpPost]
-        public IActionResult Edit(Cinema Cinema,IFormFile img)
+        public async Task<IActionResult> Edit(Cinema Cinema,IFormFile img, CancellationToken cancellationToken)
         {
-            var cinemaInDB = _context.Cinemas.AsNoTracking().FirstOrDefault(e=>e.Id==Cinema.Id);
+            var cinemaInDB = await _cinemaRepository.GetOneAsync(e=>e.Id==Cinema.Id,tracked:false,cancellationToken:cancellationToken) ;//_context.Cinemas.AsNoTracking().FirstOrDefault(e=>e.Id==Cinema.Id);
             if (img is not null)
             {
                 if (img.Length > 0)
@@ -82,22 +100,22 @@ namespace Dashboard.Areas.Admin.Controllers
             }
 
 
-            _context.Cinemas.Update(Cinema);
-            _context.SaveChanges();
+            _cinemaRepository.Update(Cinema);
+            await _cinemaRepository.CommitAsync(cancellationToken);
 
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            var Cinema = _context.Cinemas.Find(id);
+            var Cinema = await _cinemaRepository.GetOneAsync(e => e.Id  == id ,cancellationToken:cancellationToken);
             if (Cinema == null)
             {
                 return NotFound();
             }
 
-            _context.Cinemas.Remove(Cinema);
-            _context.SaveChanges();
+            _cinemaRepository.Delete(Cinema);
+            await _cinemaRepository.CommitAsync(cancellationToken) ;
 
             return RedirectToAction(nameof(Index));
         }

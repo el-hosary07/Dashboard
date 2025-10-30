@@ -1,5 +1,5 @@
-﻿
-<div class="col-xxl-9 col-md-12">
+﻿<!--class="col-xxl-9 col-md-12"-->
+<div class="card h-lg-100 overflow-hidden">
     <div class="card z-index-1" id="recentPurchaseTable" data-list="{&quot;valueNames&quot;:[&quot;name&quot;,&quot;email&quot;,&quot;product&quot;,&quot;payment&quot;,&quot;amount&quot;],&quot;page&quot;:7,&quot;pagination&quot;:true}">
         <div class="card-header">
             <div class="row flex-between-center">
@@ -30,18 +30,24 @@
             <div class="table-responsive scrollbar">
                 <table class="table table-sm fs--1 mb-0 overflow-hidden">
                     <thead class="bg-200 text-900 white-space-nowrap">
-                       
-                            
-                            <th class="sort pe-1 align-middle " data-sort="name">Movies</th>
-                                                      
-                        
+                        <tr>
+                            <th class=" pe-1 align-middle " data-sort="name">Movies</th>
+                            <th class=" pe-1 align-middle " data-sort="name">Movie Time</th>
+                            <th class=" pe-1 align-middle " data-sort="name">Price</th>
+                            <th class=" pe-1 align-middle " data-sort="name">Cinema</th>
+                            <th class=" pe-1 align-middle " data-sort="name">Category</th>
+                            <th class=" pe-1 align-middle " data-sort="name">Status</th>
+                        </tr>
+
+
                     </thead>
+
                     <!-- List of Movise -->
                     @foreach (var item in Model)
-                            {
-                       
-                    <tbody class="list" id="table-purchase-body">
-                        <tr class="btn-reveal-trigger">
+                    {
+
+                        <tbody class="list" id="table-purchase-body">
+                            <tr class="btn-reveal-trigger">
 
                                 <th class="align-middle white-space-nowrap right name">
                                     <div class="d-flex align-items-center position-relative">
@@ -51,8 +57,26 @@
                                         </div>
                                     </div>
                                 </th>
-                            <!--Values of the list -->
-                                                                                              
+                                <td>@item.MovieTime</td>
+                                <td>@item.Price.ToString("c")</td>
+                                <td>@item.Category.Name</td>
+                                <td>@item.Cinema.Name</td>
+                                @if (!item.Status)
+                                {
+                                    <td><span class="badge text-bg-danger">Not Available</span></td>
+                                }
+                                else
+                                {
+                                    <td><span class="badge text-bg-success">Available</span></td>
+
+                                }
+
+
+
+
+
+                                <!--Values of the list -->
+
                                 <td class="align-middle white-space-nowrap text-end">
                                     <div class="dropstart font-sans-serif position-static d-inline-block">
                                         <button class="btn btn-link text-600 btn-sm dropdown-toggle btn-reveal float-end" type="button" id="dropdown-recent-purchase-table-0" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><span class="fas fa-ellipsis-h fs--1"></span></button>
@@ -66,9 +90,9 @@
                                         </div>
                                     </div>
                                 </td>
-                        </tr>
-                    </tbody>
-                            }
+                            </tr>
+                        </tbody>
+                    }
                 </table>
             </div>
         </div>

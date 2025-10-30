@@ -1,8 +1,9 @@
-﻿@model Movie
+﻿@using Dashboard.ViewModels
+@model NewMovieVM
 <div class="container">
     <div class="row mb-3 align-items-center my-3">
         <div class="col-md-6">
-            <h2 class="display-6">Create New Movie</h2>
+            <h2 class="display-6">Edit Movie</h2>
         </div>
     </div>
 
@@ -12,15 +13,78 @@
 
                 <div class="mb-3">
                     <label for="name" class="form-label">Title</label>
-                    <input class="form-control" name="Name" value="@Model.Name">
+                    <input class="form-control" name="Name" value="@Model.Movie!.Name">
                 </div>
-                <img class="rounded-1 border border-200" src="~/assets/TaskImages/@Model.MainImg" width="60" alt="" onechange="previewImage(event)">
+                <img class="rounded-1 border border-200" src="~/assets/TaskImages/@Model.Movie.MainImg" width="60" alt="" onechange="previewImage(event)">
                 <div class="mb-3">
-                    <label for="img" class="form-label">Main Img</label>
-                    <input type="file" class="form-control" name="img">
+                    <label for="MainImg" class="form-label">Main Img</label>
+                    <input type="file" class="form-control" name="MainImg">
                 </div>
 
-                <input type="submit" class="btn btn-primary" value="Create" />
+                <div class="mb-3">
+                    <label for="img" class="form-label">Main Img</label>
+                    <input type="file" class="form-control" name="SubImages" multiple>
+                </div>
+                <div>
+                @foreach(var item in Model.Movie.SubImages!)
+                {
+                        <img class="rounded-1 border border-200" src="~/assets/TaskSubImages/@Model.Movie.SubImages" width="60" alt="" onechange="previewImage(event)">
+                }
+
+                </div>
+
+                <div class="mb-3">
+                    <label for="price" class="form-label">Price</label>
+                    <input class="form-control" type="number" name="Price" value="@Model.Movie.Price">
+                </div>
+
+                <div class="mb-3">
+                    <label for="dateTime" class="form-label">Date Time</label>
+                    <input class="form-control" type="text" name="MovieTime" value="@Model.Movie.MovieTime">
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" name="Status">
+                        @if (Model.Movie.Status)
+                        {
+                            <option value="true" selected>Available</option>
+                            <option value="false">Not Available</option>
+                        }
+                        else
+                        {
+                            <option value="true">Available</option>
+                            <option value="false" selected>Not Available</option>
+                        }
+                        
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label">Cinema Name</label>
+                    <select class="form-select" name="CinemaId">
+                        @foreach (var item in Model.Cinemas)
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="status" class="form-label">Cinema Name</label>
+                    <select class="form-select" name="CategoryId">
+                        @foreach (var item in Model.Categories)
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+
+                    </select>
+                </div>
+
+               
+
+
+                <input type="submit" class="btn btn-primary" value="Submit" />
 
             </form>
         </div>

@@ -1,26 +1,41 @@
 ﻿using Dashboard.DataAccess;
 using Dashboard.Models;
+using Dashboard.Repositories;
+using Dashboard.Repositories.IRepositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Common;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Dashboard.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+
     public class ActorController : Controller
     {
-        private ApplicationDbContext _context = new();
+        //private ApplicationDbContext _context = new();
+        private IRepository<Actor> _actorRepository;
 
-        public IActionResult Index()
+        ActorController(IRepository<Actor> actorRepository)
         {
-            var Actor = _context.Actors.AsNoTracking().AsQueryable();
-            return View(Actor.AsEnumerable());
+            _actorRepository = actorRepository;
         }
+
+
+        public async Task<IActionResult> Index(CancellationToken cancellationToken)
+        {
+            var category = await _actorRepository.GetAsync(tracked: false, cancellationToken: cancellationToken);
+            return View(category.AsEnumerable());
+        }
+
         [HttpGet]
         public IActionResult New()
         {
             return View();
         }
         [HttpPost]
-        public IActionResult New(Actor Actor, IFormFile img)
+        public async Task<IActionResult> New(Actor Actor, IFormFile img, CancellationToken cancellationToken)
         {
             if (img is not null && img.Length > 0)
             {
@@ -38,14 +53,17 @@ namespace Dashboard.Areas.Admin.Controllers
             }
 
 
-            _context.Actors.Add(Actor);
-            _context.SaveChanges();
+            //_context.Actors.Add(Actor);
+            //_context.SaveChanges();
+            await _actorRepository.CreateAsync(Actor, cancellationToken);
+            await _actorRepository.CommitAsync(cancellationToken);
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
         {
-            var Actor = _context.Actors.Find(id);
+            var Actor = await _actorRepository.GetOneAsync(e => e.Id == id, cancellationToken: cancellationToken);//_context.Actors.Find(id);
+
             if (Actor == null)
             {
                 return NotFound();
@@ -54,9 +72,9 @@ namespace Dashboard.Areas.Admin.Controllers
             return View(Actor);
         }
         [HttpPost]
-        public IActionResult Edit(Actor Actor, IFormFile img)
+        public async Task<IActionResult> Edit(Actor Actor, IFormFile img, CancellationToken cancellationToken)
         {
-            var actorInDB = _context.Actors.AsNoTracking().FirstOrDefault(e => e.Id == Actor.Id);
+            var actorInDB = await _actorRepository.GetOneAsync(e => e.Id == Actor.Id, tracked: false, cancellationToken: cancellationToken);//_context.Actors.AsNoTracking().FirstOrDefault(e=>e.Id==Actor.Id);
             if (img is not null)
             {
                 if (img.Length > 0)
@@ -82,22 +100,22 @@ namespace Dashboard.Areas.Admin.Controllers
             }
 
 
-            _context.Actors.Update(Actor);
-            _context.SaveChanges();
+            _actorRepository.Update(Actor);
+            await _actorRepository.CommitAsync(cancellationToken);
 
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            var Actor = _context.Actors.Find(id);
+            var Actor = await _actorRepository.GetOneAsync(e => e.Id == id, cancellationToken: cancellationToken);
             if (Actor == null)
             {
                 return NotFound();
             }
 
-            _context.Actors.Remove(Actor);
-            _context.SaveChanges();
+            _actorRepository.Delete(Actor);
+            await _actorRepository.CommitAsync(cancellationToken);
 
             return RedirectToAction(nameof(Index));
         }

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Movie>
+﻿
 <div class="row g-3 mb-3">
     <div class="col-xxl-6 col-xl-12">
         <div class="row g-3">
@@ -354,7 +354,7 @@
             <div class="card-header">
                 <div class="row flex-between-center">
                     <div class="col-6 col-sm-auto d-flex align-items-center pe-0">
-                        <h5 class="fs-0 mb-0 text-nowrap py-2 py-xl-0">Recent Purchases</h5>
+                        <h5 class="fs-0 mb-0 text-nowrap py-2 py-xl-0">Movies List</h5>
                     </div>
                     <div class="col-6 col-sm-auto ms-auto text-end ps-0">
                         <div class="d-none" id="table-purchases-actions">
@@ -370,9 +370,8 @@
                             </div>
                         </div>
                         <div id="table-purchases-replace-element">
-                            <button class="btn btn-falcon-default btn-sm" type="button"><span class="fas fa-plus" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">New</span></button>
+                            <a class="btn btn-falcon-default btn-sm" href="/admin/movie/new"><span class="fas fa-plus" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">New</span></a>
                             <button class="btn btn-falcon-default btn-sm mx-2" type="button"><span class="fas fa-filter" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">Filter</span></button>
-                            <button class="btn btn-falcon-default btn-sm" type="button"><span class="fas fa-external-link-alt" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">Export</span></button>
                         </div>
                     </div>
                 </div>
@@ -380,66 +379,69 @@
             <div class="card-body px-0 py-0">
                 <div class="table-responsive scrollbar">
                     <table class="table table-sm fs--1 mb-0 overflow-hidden">
-                        <thead class="bg-200 text-900">
+                        <thead class="bg-200 text-900 white-space-nowrap">
                             <tr>
-                                <th class="white-space-nowrap">
-                                    <div class="form-check mb-0 d-flex align-items-center">
-                                        <input class="form-check-input" id="checkbox-bulk-purchases-select" type="checkbox" data-bulk-select="{&quot;body&quot;:&quot;table-purchase-body&quot;,&quot;actions&quot;:&quot;table-purchases-actions&quot;,&quot;replacedElement&quot;:&quot;table-purchases-replace-element&quot;}">
-                                    </div>
-                                </th>
-                                <th class="sort pe-1 align-middle white-space-nowrap" data-sort="name">Customer</th>
-                                <th class="sort pe-1 align-middle white-space-nowrap" data-sort="email">Email</th>
-                                <th class="sort pe-1 align-middle white-space-nowrap" data-sort="product">Product</th>
-                                <th class="sort pe-1 align-middle white-space-nowrap text-center" data-sort="payment">Payment</th>
-                                <th class="sort pe-1 align-middle white-space-nowrap text-end" data-sort="amount">Amount</th>
-                                <th class="no-sort pe-1 align-middle data-table-row-action"></th>
+                                <th class=" pe-1 align-middle " data-sort="name">Movies</th>
+                                <th class=" pe-1 align-middle " data-sort="name">Movie Time</th>
+                                <th class=" pe-1 align-middle " data-sort="name">Price</th>
+                                <th class=" pe-1 align-middle " data-sort="name">Cinema</th>
+                                <th class=" pe-1 align-middle " data-sort="name">Category</th>
+                                <th class=" pe-1 align-middle " data-sort="name">Status</th>
                             </tr>
+
+
                         </thead>
-                            <!-- List of Movise -->
-                        <tbody class="list" id="table-purchase-body">
-                            <tr class="btn-reveal-trigger">
-                                <td class="align-middle" style="width: 28px;">
-                                    <div class="form-check mb-0">
-                                        <input class="form-check-input" type="checkbox" id="recent-purchase-0" data-bulk-select-row="data-bulk-select-row">
-                                    </div>
-                                </td>
+
+                        <!-- List of Movise -->
+                        @foreach (var item in Model)
+                        {
+
+                            <tbody class="list" id="table-purchase-body">
+                                <tr class="btn-reveal-trigger">
+
+                                    <th class="align-middle white-space-nowrap right name">
+                                        <div class="d-flex align-items-center position-relative">
+                                            <img class="rounded-1 border border-200" src="~/assets/TaskImages/@item.MainImg" width="60" alt="">
+                                            <div class="flex-1 ms-3">
+                                                <h6 class="fw-semi-bold text-nowrap">@item.Name</h6>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <td>@item.MovieTime</td>
+                                    <td>@item.Price.ToString("c")</td>
+                                    <td>@item.CinemaName</td>
+                                    <td>@item.CategoryName</td>
+                                    @if (!item.Status)
+                                    {
+                                        <td><span class="badge text-bg-danger">Not Available</span></td>
+                                    }
+                                    else
+                                    {
+                                        <td><span class="badge text-bg-success">Available</span></td>
+
+                                    }
+
+
+
+
                                     <!--Values of the list -->
-                                @foreach(var item in Model)
-                                {
-                                    <th class="align-middle white-space-nowrap name"><a href="../app/e-commerce/customer-details.html">@item.Name</a></th>
-                                    <td class="align-middle white-space-nowrap email">Email</td>
-                                    <td class="align-middle white-space-nowrap product">Prodect</td>
-                                    <td class="align-middle text-center fs-0 white-space-nowrap payment">
-                                        @if(!item.Status)
-                                        {
-                                            <span class="badge badge rounded-pill badge-soft-success">Success<span class="ms-1 fas fa-check" data-fa-transform="shrink-2"></span></span>
 
-                                        }
-                                        else
-                                        {
-                                        <td class="align-middle text-center fs-0 white-space-nowrap payment">
-                                            <span class="badge badge rounded-pill badge-soft-secondary">Blocked<span class="ms-1 fas fa-ban" data-fa-transform="shrink-2"></span></span>
-                                        </td>
-                                        }
-
-                                    </td>
-                                    <td class="align-middle text-end amount">@item.Price</td>
                                     <td class="align-middle white-space-nowrap text-end">
                                         <div class="dropstart font-sans-serif position-static d-inline-block">
                                             <button class="btn btn-link text-600 btn-sm dropdown-toggle btn-reveal float-end" type="button" id="dropdown-recent-purchase-table-0" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><span class="fas fa-ellipsis-h fs--1"></span></button>
                                             <!-- Edit , Delete -->
                                             <div class="dropdown-menu dropdown-menu-end border py-2" aria-labelledby="dropdown-recent-purchase-table-0">
                                                 <a class="dropdown-item" href="#!">View</a>
-                                            
+
                                                 <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item text-warning" href="#!">Edit</a>
-                                                <a class="dropdown-item text-danger" href="#!">Delete</a>
+                                                <a class="dropdown-item text-warning" href="/admin/movie/edit/@item.Id">Edit</a>
+                                                <a class="dropdown-item text-danger" href="/admin/movie/delete/@item.Id">Delete</a>
                                             </div>
                                         </div>
                                     </td>
-                                    }
-                            </tr>
-                        </tbody>
+                                </tr>
+                            </tbody>
+                        }
                     </table>
                 </div>
             </div>
@@ -460,6 +462,7 @@
             </div>
         </div>
     </div>
+
 
 
 

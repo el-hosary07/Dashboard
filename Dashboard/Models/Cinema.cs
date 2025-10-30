@@ -6,5 +6,6 @@
         public string Name { get; set; } = string.Empty;
         public string? MainImg { get; set; }
 
+        public List<Movie> Movies { get; set; }
     }
 }

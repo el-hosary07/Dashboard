@@ -1,4 +1,7 @@
-﻿
+﻿@using Dashboard.ViewModels
+@model NewMovieVM
+
+
 <div class="container">
     <div class="row mb-3 align-items-center my-3">
         <div class="col-md-6">
@@ -17,9 +20,56 @@
 
                 <div class="mb-3">
                     <label for="img" class="form-label">Main Img</label>
-                    <input type="file" class="form-control" name="img">
+                    <input type="file" class="form-control" name="MainImg">
                 </div>
-               
+                <div class="mb-3">
+                    <label for="img" class="form-label">Sub Images</label>
+                    <input type="file" class="form-control" name="SubImages" multiple>
+                </div>
+
+                <div class="mb-3">
+                    <label for="price" class="form-label">Price</label>
+                    <input class="form-control" type="number" name="Price">
+                </div>
+
+                <div class="mb-3">
+                    <label for="dateTime" class="form-label">Date Time</label>
+                    <input class="form-control" type="text" name="MovieTime">
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" name="Status">
+                        <option value="true">Available</option>
+                        <option value="false">Not Available</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label">Cinema Name</label>
+                    <select class="form-select" name="CinemaId">
+                        @foreach (var item in Model.Cinemas )
+                        {
+                        <option value="@item.Id">@item.Name</option>
+                            
+                        }
+                        
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label">Cinema Name</label>
+                    <select class="form-select" name="CategoryId">
+                        @foreach (var item in Model.Categories)
+                        {
+                            <option value="@item.Id">@item.Name</option>
+
+                        }
+
+                    </select>
+                </div>
+                
+
                 <input type="submit" class="btn btn-primary" value="Create" />
 
             </form>

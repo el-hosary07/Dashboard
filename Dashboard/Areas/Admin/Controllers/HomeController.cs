@@ -1,10 +1,13 @@
 using Dashboard.DataAccess;
 using Dashboard.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace Dashboard.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+
     public class HomeController : Controller
     {
         private ApplicationDbContext _context = new();
@@ -17,8 +20,19 @@ namespace Dashboard.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            var movie = _context.Movies.AsEnumerable();
-            return View(movie.AsEnumerable());
+            var Movie = _context.Movies.AsNoTracking().AsQueryable();
+            return View(Movie.Select(e => new
+            {
+                e.Id,
+                e.MainImg,
+                e.Name,
+                e.Price,
+                e.MovieTime,
+                e.Status,
+                CinemaName = e.Cinema.Name,
+                CategoryName = e.Category.Name,
+
+            }).AsEnumerable());
         }
 
         public IActionResult Privacy()
