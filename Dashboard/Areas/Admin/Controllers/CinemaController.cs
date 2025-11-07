@@ -32,11 +32,19 @@ namespace Dashboard.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult New()
         {
-            return View();
+            return View(new Cinema());
         }
         [HttpPost]
         public async Task<IActionResult> New(Cinema Cinema, IFormFile img, CancellationToken cancellationToken)
         {
+            if (!ModelState.IsValid)
+            {
+                //ModelState.AddModelError(string.Empty, "Additional Error");
+
+                TempData["error-notification"] = "Error While Saving Category";
+                Console.WriteLine("Model not valid!");
+                return View(Cinema);
+            }
             if (img is not null && img.Length > 0)
             {
                 var imgName = Guid.NewGuid().ToString() + Path.GetExtension(img.FileName);

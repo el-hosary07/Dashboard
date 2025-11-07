@@ -1,10 +1,13 @@
-using Dashboard.DataAccess;
+﻿using Dashboard.DataAccess;
 using Dashboard.Models;
 using Dashboard.Repositories;
 using Dashboard.Repositories.IRepositories;
+using Dashboard.Utilites;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 
 namespace Dashboard
 {
@@ -28,22 +31,39 @@ namespace Dashboard
 
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(
-                option=>
+                option =>
                 {
                     option.Password.RequiredLength = 8;
                     option.Password.RequireDigit = false;
                     option.User.RequireUniqueEmail = true;
-                    option.SignIn.RequireConfirmedEmail= true;
+                    option.SignIn.RequireConfirmedEmail = false;
                 }
                 )
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
+
 
             builder.Services.AddScoped<IRepository<Category>, Repository<Category>>();
             builder.Services.AddScoped<IRepository<Cinema>, Repository<Cinema>>();
             builder.Services.AddScoped<IRepository<Movie>, Repository<Movie>>();
             builder.Services.AddScoped<IRepository<Actor>, Repository<Actor>>();
             builder.Services.AddScoped<IMovieSubImagesRepository, MovieSubImagesRepository>();
+            builder.Services.AddScoped<IRepository<ApplicationUserOTP>, Repository<ApplicationUserOTP>>();
 
+            
+
+
+
+            builder.Services.AddAuthentication()
+            .AddGoogle("google", opt =>
+            {
+                var googleAuth = builder.Configuration.GetSection("Authentication:Google");
+                opt.ClientId = googleAuth["ClientId"];
+                opt.ClientSecret = googleAuth["ClientSecret"];
+                opt.SignInScheme = IdentityConstants.ExternalScheme;
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

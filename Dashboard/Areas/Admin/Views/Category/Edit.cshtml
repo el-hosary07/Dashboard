@@ -12,7 +12,8 @@
 
                 <div class="mb-3">
                     <label for="name" class="form-label">Title</label>
-                    <input class="form-control" name="Name" value="@Model.Name">
+                    <input class="form-control" asp-for="Name">
+                    <span class ="text-info" asp-validation-for="Name"></span>
                 </div>
 
                 <input type="submit" class="btn btn-primary" value="Create" />
@@ -21,3 +22,8 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial">
+     <partial name="_NotificationPartial">
+}

@@ -15,6 +15,8 @@ namespace Dashboard.DataAccess
         public DbSet<Cinema> Cinemas  { get; set; }
         public DbSet<Category> Categories  { get; set; }
         public DbSet<MovieSubImages> SubImages  { get; set; }
+        public DbSet<ApplicationUserOTP> ApplicationUserOTPs { get; set; }
+
 
         public ApplicationDbContext() { }
 
@@ -29,6 +31,7 @@ namespace Dashboard.DataAccess
         {
             throw new NotImplementedException();
         }
-        public DbSet<Dashboard.ViewModels.RegesterVM> RegesterVM { get; set; } = default!;
+        public DbSet<Dashboard.ViewModels.RegisterVM> RegesterVM { get; set; } = default!;
+        public DbSet<Dashboard.ViewModels.LoginVM> LoginVM { get; set; } = default!;
     }
 }

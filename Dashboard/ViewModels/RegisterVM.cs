@@ -2,7 +2,7 @@
 
 namespace Dashboard.ViewModels
 {
-    public class RegesterVM
+    public class RegisterVM
     {
         public int Id { get; set; }
         [Required]

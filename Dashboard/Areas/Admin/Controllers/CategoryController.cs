@@ -17,7 +17,7 @@ namespace Dashboard.Areas.Admin.Controllers
         // private ApplicationDbContext _context = new();
         private IRepository<Category> _categoryRepository;//= new Repository<Category>();
 
-        public CategoryController(IRepository<Category> categoryRepository) 
+        public CategoryController(IRepository<Category> categoryRepository)
         {
             _categoryRepository = categoryRepository;
         }
@@ -27,22 +27,37 @@ namespace Dashboard.Areas.Admin.Controllers
             return View(category.AsEnumerable());
         }
         [HttpGet]
-        public IActionResult New() 
+        public IActionResult New()
         {
-            return View();
+            return View(new Category());
         }
         [HttpPost]
-        public async Task<IActionResult> New(Category category ,CancellationToken cancellationToken) 
+        public async Task<IActionResult> New(Category category, CancellationToken cancellationToken)
         {
+
+             if(!ModelState.IsValid)
+            {
+                //ModelState.AddModelError(string.Empty, "Additional Error");
+
+                TempData["error-notification"] = "Error While Saving Category";
+                Console.WriteLine("Model not valid!");
+                return View(category);
+            }
+
             await _categoryRepository.CreateAsync(category, cancellationToken);
             await _categoryRepository.CommitAsync(cancellationToken);
+
+            //Response.Cookies.Append("success-notification", "Add Category Successfully");
+            TempData["success-notification"] = "Add Category Successfully";
+
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
-        public IActionResult Edit(int id ,CancellationToken cancellationToken)
+        public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
         {
-            var category= _categoryRepository.GetOneAsync(e=>e.Id==id,cancellationToken: cancellationToken);
-            if (category == null) {
+            var category = await _categoryRepository.GetOneAsync(e => e.Id == id, cancellationToken: cancellationToken);
+            if (category == null)
+            {
                 return NotFound();
             }
 
@@ -52,6 +67,11 @@ namespace Dashboard.Areas.Admin.Controllers
 
         public async Task<IActionResult> Edit(Category category, CancellationToken cancellationToken)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(category);
+            }
+
             _categoryRepository.Update(category);
             await _categoryRepository.CommitAsync(cancellationToken);
 

@@ -1,4 +1,4 @@
-﻿@model Dashboard.ViewModels.RegesterVM
+﻿@model Dashboard.ViewModels.RegisterVM
 
 @{
     ViewData["Title"] = "Register";
@@ -7,7 +7,7 @@
 <div class="container">
     <h1>Register</h1>
 
-    <h4>RegiterVM</h4>
+    
     <hr />
     <div class="row">
         <div class="col-md-12">
@@ -48,9 +48,10 @@
     <div>
         <a asp-action="Index">Back to List</a>
     </div>
+    <div>
+        <a asp-action="Login">Login</a>
+    </div>
 </div>
-
-
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
