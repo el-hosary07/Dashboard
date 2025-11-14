@@ -52,18 +52,20 @@ namespace Dashboard
             builder.Services.AddScoped<IMovieSubImagesRepository, MovieSubImagesRepository>();
             builder.Services.AddScoped<IRepository<ApplicationUserOTP>, Repository<ApplicationUserOTP>>();
 
-            
 
 
 
+
+            // External Login With Google
             builder.Services.AddAuthentication()
             .AddGoogle("google", opt =>
             {
                 var googleAuth = builder.Configuration.GetSection("Authentication:Google");
-                opt.ClientId = googleAuth["ClientId"];
-                opt.ClientSecret = googleAuth["ClientSecret"];
+                opt.ClientId = googleAuth["ClientId"] ?? "";
+                opt.ClientSecret = googleAuth["ClientSecret"] ?? "";
                 opt.SignInScheme = IdentityConstants.ExternalScheme;
             });
+            // External Login With FaceBook
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

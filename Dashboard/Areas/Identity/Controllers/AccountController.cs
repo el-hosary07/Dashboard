@@ -59,7 +59,7 @@ namespace Dashboard.Areas.Identity.Controllers
             var link = Url.Action(nameof(ConfirmEmail), "Account", new { area = "Identity", token = token, user.Id }, Request.Scheme);
 
             await _emailSender.SendEmailAsync(registerVM.Email
-                , "Ecommerce 518 - Confirm Your Email!"
+                , "Falcon - Confirm Your Email!"
                 , $"<h1>Please Confirm Your Email By Clicking <a href='{link}'>Here</a></h1>");
 
             TempData["success-notification"] = "Send Email Successfully";
