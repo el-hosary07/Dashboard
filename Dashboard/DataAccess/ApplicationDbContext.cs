@@ -16,6 +16,7 @@ namespace Dashboard.DataAccess
         public DbSet<Category> Categories  { get; set; }
         public DbSet<MovieSubImages> SubImages  { get; set; }
         public DbSet<ApplicationUserOTP> ApplicationUserOTPs { get; set; }
+        public DbSet<Cart> carts { get; set; } 
 
 
         public ApplicationDbContext() { }

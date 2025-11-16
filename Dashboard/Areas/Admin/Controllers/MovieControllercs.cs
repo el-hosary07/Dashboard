@@ -3,6 +3,7 @@ using Dashboard.Models;
 using Dashboard.Repositories;
 using Dashboard.Repositories.IRepositories;
 using Dashboard.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 namespace Dashboard.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = $"{SD.SUPER_ADMIN_ROLE},{SD.ADMIN_ROLE},{SD.EMPLOYEE_ROLE}")]
 
     public class MovieController : Controller
     {
@@ -29,18 +31,18 @@ namespace Dashboard.Areas.Admin.Controllers
             IRepository<Category> categoryRepository,
             IRepository<Cinema> cinemaRepository,
             IMovieSubImagesRepository subImagesRepository
-            ) 
+            )
         {
             _movieRepository = movieRepository;
             _categoryRepository = categoryRepository;
             _cinemaRepository = cinemaRepository;
             _subImagesRepository = subImagesRepository;
-        }   
+        }
 
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            var movie = await _movieRepository.GetAsync(include: [e=>e.Category,e=>e.Cinema] ,tracked: false, cancellationToken: cancellationToken);
+            var movie = await _movieRepository.GetAsync(include: [e => e.Category, e => e.Cinema], tracked: false, cancellationToken: cancellationToken);
 
             return View(movie.AsEnumerable());
         }
@@ -93,33 +95,37 @@ namespace Dashboard.Areas.Admin.Controllers
                     {
                         Img = subImagesName,
                         MovieId = movieCreated.Id
-                    },cancellationToken);
+                    }, cancellationToken);
                 }
                 await _subImagesRepository.CommitAsync(cancellationToken);
             }
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
-        public async Task<IActionResult> Edit(int id,CancellationToken cancellationToken)
+        [Authorize(Roles = $"{SD.SUPER_ADMIN_ROLE},{SD.ADMIN_ROLE}")]
+
+        public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
         {
-            var movie = await _movieRepository.GetOneAsync(e=>e.Id == id, cancellationToken :cancellationToken);
+            var movie = await _movieRepository.GetOneAsync(e => e.Id == id, cancellationToken: cancellationToken);
             if (movie == null)
             {
                 return NotFound();
             }
-            
+
 
 
             return View(new NewMovieVM()
             {
                 Movie = movie,
                 Categories = await _categoryRepository.GetAsync(tracked: false, cancellationToken: cancellationToken),
-                Cinemas =  await _cinemaRepository.GetAsync(tracked: false, cancellationToken: cancellationToken),
+                Cinemas = await _cinemaRepository.GetAsync(tracked: false, cancellationToken: cancellationToken),
                 SubImages = await _subImagesRepository.GetAsync(e => e.MovieId == id, cancellationToken: cancellationToken)
             });
         }
         [HttpPost]
-        public async Task<IActionResult> Edit(Movie Movie, IFormFile? MainImg, List<IFormFile>? SubImages,CancellationToken cancellationToken)
+        [Authorize(Roles = $"{SD.SUPER_ADMIN_ROLE},{SD.ADMIN_ROLE}")]
+
+        public async Task<IActionResult> Edit(Movie Movie, IFormFile? MainImg, List<IFormFile>? SubImages, CancellationToken cancellationToken)
         {
             var movieInDB = await _movieRepository.GetOneAsync(e => e.Id == Movie.Id, tracked: false, cancellationToken: cancellationToken);
             if (MainImg is not null)
@@ -148,7 +154,7 @@ namespace Dashboard.Areas.Admin.Controllers
 
             if (SubImages is not null)
             {
-                if (SubImages.Count>0)
+                if (SubImages.Count > 0)
                 {
                     var oldImages = await _subImagesRepository.GetAsync(e => e.MovieId == Movie.Id);
 
@@ -170,17 +176,18 @@ namespace Dashboard.Areas.Admin.Controllers
                         {
                             Img = subImagesName,
                             MovieId = Movie.Id,
-                        } , cancellationToken:cancellationToken);
+                        }, cancellationToken: cancellationToken);
                     }
                     await _subImagesRepository.CommitAsync(cancellationToken);
                 }
             }
 
             _movieRepository.Update(Movie);
-            await _movieRepository.CommitAsync(cancellationToken) ;
+            await _movieRepository.CommitAsync(cancellationToken);
 
             return RedirectToAction(nameof(Index));
         }
+        [Authorize(Roles = $"{SD.SUPER_ADMIN_ROLE},{SD.ADMIN_ROLE}")]
 
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
@@ -189,9 +196,9 @@ namespace Dashboard.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            
-             _movieRepository.Delete(movie); 
-            await _movieRepository.CommitAsync (cancellationToken) ;
+
+            _movieRepository.Delete(movie);
+            await _movieRepository.CommitAsync(cancellationToken);
 
             return RedirectToAction(nameof(Index));
         }

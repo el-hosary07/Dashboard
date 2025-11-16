@@ -63,8 +63,17 @@
                                             <a class="dropdown-item" href="#!">View</a>
 
                                             <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item text-warning" href="/admin/cinema/edit/@item.Id">Edit</a>
-                                            <a class="dropdown-item text-danger" href="/admin/cinema/delete/@item.Id">Delete</a>
+                                            @if (User.IsInRole(SD.SUPER_ADMIN_ROLE) || User.IsInRole(SD.ADMIN_ROLE))
+                                            {
+                                                <td>
+                                                    <a href="/Admin/Category/Edit/@item.Id" type="button" class="btn btn-warning">Edit</a>
+                                                    <a href="/Admin/Category/Delete/@item.Id" class="btn btn-danger btn-delete">Delete</a>
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td>No Actions!</td>
+                                            }
                                         </div>
                                     </div>
                                 </td>

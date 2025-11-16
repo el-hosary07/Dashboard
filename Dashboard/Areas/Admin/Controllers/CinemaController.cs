@@ -2,6 +2,7 @@
 using Dashboard.Models;
 using Dashboard.Repositories;
 using Dashboard.Repositories.IRepositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Common;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 namespace Dashboard.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = $"{SD.SUPER_ADMIN_ROLE},{SD.ADMIN_ROLE},{SD.EMPLOYEE_ROLE}")]
 
     public class CinemaController : Controller
     {
@@ -68,6 +70,8 @@ namespace Dashboard.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
+        [Authorize(Roles = $"{SD.SUPER_ADMIN_ROLE},{SD.ADMIN_ROLE}")]
+
         public async Task<IActionResult> Edit(int id,CancellationToken cancellationToken)
         {
             var Cinema = await _cinemaRepository.GetOneAsync(e => e.Id == id, cancellationToken: cancellationToken);//_context.Cinemas.Find(id);
@@ -80,6 +84,8 @@ namespace Dashboard.Areas.Admin.Controllers
             return View(Cinema);
         }
         [HttpPost]
+        [Authorize(Roles = $"{SD.SUPER_ADMIN_ROLE},{SD.ADMIN_ROLE}")]
+
         public async Task<IActionResult> Edit(Cinema Cinema,IFormFile img, CancellationToken cancellationToken)
         {
             var cinemaInDB = await _cinemaRepository.GetOneAsync(e=>e.Id==Cinema.Id,tracked:false,cancellationToken:cancellationToken) ;//_context.Cinemas.AsNoTracking().FirstOrDefault(e=>e.Id==Cinema.Id);
@@ -113,6 +119,7 @@ namespace Dashboard.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        [Authorize(Roles = $"{SD.SUPER_ADMIN_ROLE},{SD.ADMIN_ROLE}")]
 
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {

@@ -103,7 +103,13 @@ namespace Dashboard.Areas.Identity.Controllers
 
             return RedirectToAction("Index", "Home", new { area = "Customer" });
         }
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            TempData["success-notification"] = "Logout Successfully";
 
+            return RedirectToAction("Login");
+        }
         public IActionResult ResendEmailConfirmation()
         {
             return View();

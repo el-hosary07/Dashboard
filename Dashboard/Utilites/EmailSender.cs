@@ -12,7 +12,7 @@ namespace Dashboard.Utilites
             {
                 EnableSsl = true,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential("hosary007@gmail.com", "yefx ocbo lsjy sbbs")
+                Credentials = new NetworkCredential("hosary007@gmail.com", "")
             };
 
             return client.SendMailAsync(

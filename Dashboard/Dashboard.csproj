@@ -4,9 +4,11 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>b6f28571-ad01-4cfe-bc2a-4e93302f5948</UserSecretsId>
   </PropertyGroup>
 	
 	<ItemGroup>
+		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.10" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
@@ -15,6 +17,8 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
+		<PackageReference Include="Stripe.net" Version="49.1.0" />
 	</ItemGroup>
 	
   <ItemGroup>
@@ -27,6 +31,7 @@
   </ItemGroup>
 	
   <ItemGroup>
+    <None Include="Areas\Admin\Controllers\UserController.cs" />
     <None Include="Repositories\IRepositories\IMovieSubImagesRepository.cs" />
   </ItemGroup>
 

@@ -1,12 +1,10 @@
-﻿using Dashboard.DataAccess;
-using Dashboard.Models;
-using Dashboard.Repositories;
-using Dashboard.Repositories.IRepositories;
-using Dashboard.Utilites;
+﻿
+using Dashboard.Utilites.DBSeeder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 using System.Configuration;
 
 namespace Dashboard
@@ -25,7 +23,8 @@ namespace Dashboard
             builder.Services.AddDbContext<ApplicationDbContext>(
                 option =>
                 {
-                    option.UseSqlServer(builder.Configuration.GetConnectionString(ConnectionString));
+                    option.UseSqlServer(ConnectionString);
+
                 });
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));//??
 
@@ -42,6 +41,13 @@ namespace Dashboard
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Identity/Account/Login"; // Customize login path
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied"; // Customize access denied path
+                                                                             // ... other cookie options ...
+            });
+
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
@@ -49,24 +55,28 @@ namespace Dashboard
             builder.Services.AddScoped<IRepository<Cinema>, Repository<Cinema>>();
             builder.Services.AddScoped<IRepository<Movie>, Repository<Movie>>();
             builder.Services.AddScoped<IRepository<Actor>, Repository<Actor>>();
+            builder.Services.AddScoped<IRepository<Cart>, Repository<Cart>>();
             builder.Services.AddScoped<IMovieSubImagesRepository, MovieSubImagesRepository>();
             builder.Services.AddScoped<IRepository<ApplicationUserOTP>, Repository<ApplicationUserOTP>>();
+            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+
+            //pay
+           // builder.Services.AddScoped<IRepository<Dashboard.Models.Movie>, Repository<Dashboard.Models.Movie>>();
 
 
+            // builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
 
+            StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
-            // External Login With Google
-            builder.Services.AddAuthentication()
-            .AddGoogle("google", opt =>
-            {
-                var googleAuth = builder.Configuration.GetSection("Authentication:Google");
-                opt.ClientId = googleAuth["ClientId"] ?? "";
-                opt.ClientSecret = googleAuth["ClientSecret"] ?? "";
-                opt.SignInScheme = IdentityConstants.ExternalScheme;
-            });
-            // External Login With FaceBook
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var initializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+                initializer.Initialize();
+            }
+
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

@@ -2,6 +2,7 @@
 using Dashboard.Models;
 using Dashboard.Repositories;
 using Dashboard.Repositories.IRepositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Common;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 namespace Dashboard.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = $"{SD.SUPER_ADMIN_ROLE},{SD.ADMIN_ROLE},{SD.EMPLOYEE_ROLE}")]
 
     public class ActorController : Controller
     {
@@ -60,6 +62,8 @@ namespace Dashboard.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
+        [Authorize(Roles = $"{SD.SUPER_ADMIN_ROLE},{SD.ADMIN_ROLE}")]
+
         public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
         {
             var Actor = await _actorRepository.GetOneAsync(e => e.Id == id, cancellationToken: cancellationToken);//_context.Actors.Find(id);
@@ -72,6 +76,8 @@ namespace Dashboard.Areas.Admin.Controllers
             return View(Actor);
         }
         [HttpPost]
+        [Authorize(Roles = $"{SD.SUPER_ADMIN_ROLE},{SD.ADMIN_ROLE}")]
+
         public async Task<IActionResult> Edit(Actor Actor, IFormFile img, CancellationToken cancellationToken)
         {
             var actorInDB = await _actorRepository.GetOneAsync(e => e.Id == Actor.Id, tracked: false, cancellationToken: cancellationToken);//_context.Actors.AsNoTracking().FirstOrDefault(e=>e.Id==Actor.Id);
@@ -105,6 +111,7 @@ namespace Dashboard.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        [Authorize(Roles = $"{SD.SUPER_ADMIN_ROLE},{SD.ADMIN_ROLE}")]
 
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
